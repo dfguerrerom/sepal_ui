@@ -139,6 +139,16 @@ def init_ee() -> None:
     Note:
         As all init method of pytest-gee, this method will fallback to a regular ``ee.Initialize()`` if the environment variable is not found e.g. on your local computer.
     """
+    if os.environ["EARTHENGINE_TOKEN"]:
+        print("Earth Engine token detected. Authenticating...")
+
+    # Get all environment variables
+    env_keys = os.environ.keys()
+
+    # Print the keys of the environment variables
+    for key in env_keys:
+        print(key)
+
     if not ee.data._credentials:
         credential_folder_path = Path.home() / ".config" / "earthengine"
         credential_file_path = credential_folder_path / "credentials"
