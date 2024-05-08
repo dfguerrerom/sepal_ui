@@ -139,16 +139,6 @@ def init_ee() -> None:
     Note:
         As all init method of pytest-gee, this method will fallback to a regular ``ee.Initialize()`` if the environment variable is not found e.g. on your local computer.
     """
-    if os.environ["EARTHENGINE_TOKEN"]:
-        print("Earth Engine token detected. Authenticating...")
-
-    # Get all environment variables
-    env_keys = os.environ.keys()
-
-    # Print the keys of the environment variables
-    for key in env_keys:
-        print(key)
-
     if not ee.data._credentials:
         credential_folder_path = Path.home() / ".config" / "earthengine"
         credential_file_path = credential_folder_path / "credentials"
@@ -159,20 +149,19 @@ def init_ee() -> None:
             ee_token = os.environ["EARTHENGINE_TOKEN"]
             credential_folder_path.mkdir(parents=True, exist_ok=True)
             credential_file_path.write_text(ee_token)
+            print(ee_token)
+            print("Earth Engine token found. Initializing Earth Engine...")
 
         # Extract the project name from credentials
         _credentials = json.loads(credential_file_path.read_text())
-        project_id = os.environ.get("EARTHENGINE_PROJECT", None)
-        project_id = project_id or _credentials.get(
-            "project_id", _credentials.get("project", None)
-        )
+        project_id = _credentials.get("project_id", _credentials.get("project", None))
 
         if not project_id:
             raise NameError(
                 "The project name cannot be detected. "
-                "Please set the EARTHENGINE_PROJECT environment variable. "
-                "Or authenticate using `earthengine set_project project_name`."
+                "Please set it using `earthengine set_project project_name`."
             )
+
         # Check if we are using a google service account
         if _credentials.get("type") == "service_account":
             ee_user = _credentials.get("client_email")
@@ -180,6 +169,9 @@ def init_ee() -> None:
                 ee_user, str(credential_file_path)
             )
             ee.Initialize(credentials=credentials)
+            ee.data._cloud_api_user_project = project_id
+            return
+
         # if the user is in local development the authentication should
         # already be available
         ee.Initialize(project=project_id)
