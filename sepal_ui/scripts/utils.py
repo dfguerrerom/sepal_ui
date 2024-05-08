@@ -149,8 +149,6 @@ def init_ee() -> None:
             ee_token = os.environ["EARTHENGINE_TOKEN"]
             credential_folder_path.mkdir(parents=True, exist_ok=True)
             credential_file_path.write_text(ee_token)
-            print(ee_token)
-            print("Earth Engine token found. Initializing Earth Engine...")
 
         # Extract the project name from credentials
         _credentials = json.loads(credential_file_path.read_text())
